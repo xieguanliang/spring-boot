@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,8 +50,8 @@ class NoSuchMethodFailureAnalyzer extends AbstractFailureAnalyzer<NoSuchMethodEr
 		}
 		String description = getDescription(cause, className, candidates, actual);
 		return new FailureAnalysis(description,
-				"Correct the classpath of your application so that it contains a single,"
-						+ " compatible version of " + className,
+				"Correct the classpath of your application so that it contains a single," + " compatible version of "
+						+ className,
 				cause);
 	}
 
@@ -71,8 +71,7 @@ class NoSuchMethodFailureAnalyzer extends AbstractFailureAnalyzer<NoSuchMethodEr
 	private List<URL> findCandidates(String className) {
 		try {
 			return Collections.list(NoSuchMethodFailureAnalyzer.class.getClassLoader()
-					.getResources(ClassUtils.convertClassNameToResourcePath(className)
-							+ ".class"));
+					.getResources(ClassUtils.convertClassNameToResourcePath(className) + ".class"));
 		}
 		catch (Throwable ex) {
 			return null;
@@ -81,23 +80,28 @@ class NoSuchMethodFailureAnalyzer extends AbstractFailureAnalyzer<NoSuchMethodEr
 
 	private URL getActual(String className) {
 		try {
-			return getClass().getClassLoader().loadClass(className).getProtectionDomain()
-					.getCodeSource().getLocation();
+			return getClass().getClassLoader().loadClass(className).getProtectionDomain().getCodeSource().getLocation();
 		}
 		catch (Throwable ex) {
 			return null;
 		}
 	}
 
-	private String getDescription(NoSuchMethodError cause, String className,
-			List<URL> candidates, URL actual) {
+	private String getDescription(NoSuchMethodError cause, String className, List<URL> candidates, URL actual) {
 		StringWriter description = new StringWriter();
 		PrintWriter writer = new PrintWriter(description);
-		writer.print("An attempt was made to call the method ");
-		writer.print(cause.getMessage());
-		writer.print(" but it does not exist. Its class, ");
-		writer.print(className);
-		writer.println(", is available from the following locations:");
+		writer.println("An attempt was made to call a method that does not"
+				+ " exist. The attempt was made from the following location:");
+		writer.println();
+		writer.print("    ");
+		writer.println(cause.getStackTrace()[0]);
+		writer.println();
+		writer.println("The following method did not exist:");
+		writer.println();
+		writer.print("    ");
+		writer.println(cause.getMessage());
+		writer.println();
+		writer.println("The method's class, " + className + ", is available from the following locations:");
 		writer.println();
 		for (URL candidate : candidates) {
 			writer.print("    ");

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -35,12 +35,11 @@ import org.springframework.integration.file.FileWritingMessageHandler;
 public class SampleParentContextApplication {
 
 	public static void main(String[] args) throws Exception {
-		new SpringApplicationBuilder(Parent.class)
-				.child(SampleParentContextApplication.class).run(args);
+		new SpringApplicationBuilder(Parent.class).child(SampleParentContextApplication.class).run(args);
 	}
 
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
-	@EnableConfigurationProperties(ServiceProperties.class)
 	protected static class Parent {
 
 		private final ServiceProperties serviceProperties;
@@ -68,21 +67,18 @@ public class SampleParentContextApplication {
 
 		@Bean
 		public FileWritingMessageHandler fileWriter() {
-			FileWritingMessageHandler writer = new FileWritingMessageHandler(
-					this.serviceProperties.getOutputDir());
+			FileWritingMessageHandler writer = new FileWritingMessageHandler(this.serviceProperties.getOutputDir());
 			writer.setExpectReply(false);
 			return writer;
 		}
 
 		@Bean
 		public IntegrationFlow integrationFlow(SampleEndpoint endpoint) {
-			return IntegrationFlows.from(fileReader(), new FixedRatePoller())
-					.channel(inputChannel()).handle(endpoint).channel(outputChannel())
-					.handle(fileWriter()).get();
+			return IntegrationFlows.from(fileReader(), new FixedRatePoller()).channel(inputChannel()).handle(endpoint)
+					.channel(outputChannel()).handle(fileWriter()).get();
 		}
 
-		private static class FixedRatePoller
-				implements Consumer<SourcePollingChannelAdapterSpec> {
+		private static class FixedRatePoller implements Consumer<SourcePollingChannelAdapterSpec> {
 
 			@Override
 			public void accept(SourcePollingChannelAdapterSpec spec) {
